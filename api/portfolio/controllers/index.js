@@ -1,3 +1,3 @@
-const { addProject } = require("./project.controller");
+const { addProject, getAllProjects } = require("./project.controller");
 
-module.exports = { addProject } 
+module.exports = { addProject , getAllProjects} 

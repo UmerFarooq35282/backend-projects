@@ -8,4 +8,14 @@ const addProject = async (req, res) => {
     }
 }
 
-module.exports = { addProject }
+const getAllProjects = async (req, res) => {
+    try {
+        res.send("logic for All projects fetching implement soon")
+    } catch (error) {
+        res.status(500).json({
+            message: error.message || "Internal Server Error"
+        })
+    }
+}
+
+module.exports = { addProject , getAllProjects}
