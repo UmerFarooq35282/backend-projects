@@ -13,7 +13,7 @@ export const getGeminiChatResponse = async (req, res) => {
         let csvFileData;
 
         if (userFile) {
-            csvFileData = await CSVReader(req.file.path);
+            csvFileData = await CSVReader(userFile.buffer);
         }
 
         const model = genAI.getGenerativeModel({

@@ -1,15 +1,16 @@
 import fs from 'fs';
-import path from "path";
 import csv from 'csv-parser';
-
-const CSVReader = (filePath) => {
+import { Readable } from 'stream';
+const CSVReader = (fileBuffer) => {
     return new Promise((resolve, reject) => {
         const results = [];
-        fs.createReadStream(filePath)
+        const stream = Readable.from(fileBuffer.toString("utf8"));
+        stream
             .pipe(csv())
-            .on('data', (data) => results.push(data))
-            .on('end', () => resolve(results))
-            .on("error", (err) => reject(err))
+            .on("data", (data) => results.push(data))
+            .on("end", () => resolve(results))
+            .on("error", (err) => reject(err));
+
     })
 }
 
