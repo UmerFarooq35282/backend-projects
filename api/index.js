@@ -5,38 +5,38 @@ const { connectDB } = require("./config/db.config.js");
 const { projectRoutes } = require("./projetcs/portfolio/routes");
 const { responseRouter } = require("./projetcs/genAI(Invesment)/routes/index.js");
 const cors = require("cors");
-const { allowedOrigins } = require("./config/origin.config.js");
+const { originFilter } = require("./config/origin.config.js");
+const { SuccessResponse, ErrorResponse } = require("./utils/sendingResponse.js");
+const asyncHandler = require("./utils/asyncHandler.js");
+const { errorHandlerMiddleware } = require("./middleware/errorHandler.middleware.js");
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8080
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true)
-    } else {
-      callback(new Error("Not allowed by CORS"))
-    }
-  },
+  origin: originFilter,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
-}))
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
-
-// connectDB();
 
 app.use("/api/auth", authRouter)
 app.use("/api/portfolio/project", projectRoutes)
 app.use("/api/genAI/investmentAgent", responseRouter)
 
-app.get("/", (req, res) => {
-  res.send("Express backend Vercel par successfully chal raha hai!");
-});
+app.get("/", asyncHandler(async (req, res, next) => {
+  throw new SuccessResponse("Express backend Vercel par successfully chal raha hai!")
+}));
+
+app.use(errorHandlerMiddleware);
+
 
 app.listen(PORT, () => {
   console.log("App is running on port ", PORT)
+  connectDB();
 })
 
 module.exports = app;

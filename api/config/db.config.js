@@ -1,12 +1,34 @@
 const mongoose = require("mongoose");
 
+const getDBURL = () => {
+    const appMode = process.env.APP_MODE?.toLowerCase();
+    let DB_URL;
+
+    if (appMode === "development") {
+        DB_URL = process.env.LOCAL_DB_URL;
+    } else {
+        DB_URL = process.env.DB_URL;
+    }
+
+    return DB_URL;
+};
+
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.DB_URL)
-        console.log("DB Connected")
-    } catch (error) {
-        console.log("Error in DB Connection:: ", error.message)
-    }
-}
+        const dbURL = getDBURL();
 
-module.exports = { connectDB }
+        if (!dbURL) {
+            console.error("❌ Database URL not provided!");
+            process.exit(1);
+        }
+
+        await mongoose.connect(dbURL);
+
+        console.log(`✅ MongoDB connected in ${process.env.APP_MODE} mode`);
+    } catch (error) {
+        console.error("❌ Error in DB Connection:", error.message);
+        process.exit(1);
+    }
+};
+
+module.exports = { connectDB };
