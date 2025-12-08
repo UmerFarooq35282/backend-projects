@@ -43,11 +43,7 @@ const loginFunc = asyncHandler(async (req, res, next) => {
     if (!matchPassword) throw new ErrorResponse("Invalid credentials", 400);
 
     const token = generateToken({ _id: user._id, projectName: user.projectName }, process.env.JWT_SECRET, "7d");
-    return res.status(200).json({
-        success: true,
-        message: "Login Successful",
-        token,
-    });
+    throw new SuccessResponse("Login Successfully", { token }, 200);
 })
 
 
