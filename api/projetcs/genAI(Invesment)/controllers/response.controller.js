@@ -1,10 +1,12 @@
 import dotenv from "dotenv";
-import asyncHandler from "../../../utils/asyncHandler.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ErrorResponse, SuccessResponse } from "../../../utils/sendingResponse.js";
+import asyncHandler from "../../../utils/asyncHandler.js";
 import { CSVReader } from "../utils/csvReader.js";
-import { generateAIResponse } from "../utils/aiAgent.helper.js";
 
 dotenv.config();
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const getGeminiChatResponse = asyncHandler(async (req, res, next) => {
   const { userPrompt } = req.body;
@@ -19,11 +21,15 @@ export const getGeminiChatResponse = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const aiResponse = await generateAIResponse(userPrompt, csvFileData);
+  try {
+    const aiResponse = await generateAIResponse(userPrompt, csvFileData);
 
-  throw new SuccessResponse(
-    "AI response generated successfully",
-    { ai: aiResponse, fileData: csvFileData || null },
-    200
-  );
+    throw new SuccessResponse(
+      "AI response generated successfully",
+      { ai: aiResponse, fileData: csvFileData || null },
+      200
+    );
+  } catch (error) {
+    throw new ErrorResponse(error.message || "AI model failed", 500);
+  }
 });

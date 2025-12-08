@@ -1,67 +1,43 @@
 const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const http = require("http");
-const { Server } = require("socket.io");
-const { aiAgentSocket } = require("./projetcs/genAI(Invesment)/sockets/chat.socket.js");
-
 const authRouter = require("./routes/auth.route.js");
+const dotenv = require("dotenv");
 const { connectDB } = require("./config/db.config.js");
 const { projectRoutes } = require("./projetcs/portfolio/routes");
 const { responseRouter } = require("./projetcs/genAI(Invesment)/routes/index.js");
+const cors = require("cors");
 const { originFilter } = require("./config/origin.config.js");
 const { SuccessResponse, ErrorResponse } = require("./utils/sendingResponse.js");
 const asyncHandler = require("./utils/asyncHandler.js");
 const { errorHandlerMiddleware } = require("./middleware/errorHandler.middleware.js");
-
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8080
 
-// ✅ Middleware setup
 app.use(cors({
   origin: originFilter,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// ✅ Database connection once
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }))
+
 connectDB();
 
-// ✅ API routes
-app.use("/api/auth", authRouter);
-app.use("/api/portfolio/project", projectRoutes);
-app.use("/api/genAI/investmentAgent", responseRouter);
+app.use("/api/auth", authRouter)
+app.use("/api/portfolio/project", projectRoutes)
+app.use("/api/genAI/investmentAgent", responseRouter)
 
-// ✅ Root route
 app.get("/", asyncHandler(async (req, res, next) => {
-  throw new SuccessResponse("Express backend Vercel par successfully chal raha hai!");
+  const connectionResponse = await connectDB();
+  throw new SuccessResponse(`Express backend Vercel par successfully chal raha hai! ${connectionResponse}`)
 }));
 
-// ✅ Error middleware
 app.use(errorHandlerMiddleware);
 
-// ✅ Create HTTP server
-const server = http.createServer(app);
-
-// ✅ Attach socket.io to same server
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
-
-// ✅ Initialize socket events
-aiAgentSocket(io);
-
-// ✅ Listen using HTTP server (not app)
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => {
+  console.log("App is running on port ", PORT)
+})
 
 module.exports = app;
